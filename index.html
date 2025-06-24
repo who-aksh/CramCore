@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CramCore - Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .card {
+      @apply p-4 bg-white dark:bg-gray-800 shadow-xl rounded-2xl transition-all;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans">
+  <div class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="w-full max-w-2xl">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-bold">CramCore 🧠</h1>
+        <button id="toggleTheme" class="px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 text-sm">Toggle Theme</button>
+      </div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <a href="quiz.html" class="card hover:scale-105">
+      <h2 class="text-xl font-semibold">🎮 Game Mode</h2>
+      <p class="text-sm">Quiz yourself by topic, difficulty, and AI-powered question sets.</p>
+    </a>
+    <a href="flashcards.html" class="card hover:scale-105">
+      <h2 class="text-xl font-semibold">🃏 Flashcard Mode</h2>
+      <p class="text-sm">Flip, learn, and master every topic through active recall.</p>
+    </a>
+    <a href="dashboard.html" class="card hover:scale-105">
+      <h2 class="text-xl font-semibold">📊 Dashboard</h2>
+      <p class="text-sm">Track your XP, weak topics, and progress across the syllabus.</p>
+    </a>
+    <a href="#" class="card hover:scale-105">
+      <h2 class="text-xl font-semibold">⚙️ Settings</h2>
+      <p class="text-sm">Paste API key, customize difficulty logic and UI themes.</p>
+    </a>
+  </div>
+</div>
+
+  </div>  <script>
+    const toggleTheme = document.getElementById('toggleTheme');
+    toggleTheme.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // Load saved theme
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    });
+  </script></body>
+</html>
