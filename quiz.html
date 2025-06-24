@@ -1,0 +1,149 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CramCore - Game Mode</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans min-h-screen p-4">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold mb-4">🎮 Game Mode</h1><!-- Topic & Difficulty Selector -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+  <div>
+    <label for="subject" class="block text-sm font-medium mb-1">Subject</label>
+    <select id="subject" class="w-full p-2 rounded bg-white dark:bg-gray-800"></select>
+  </div>
+  <div>
+    <label for="topic" class="block text-sm font-medium mb-1">Topic</label>
+    <select id="topic" class="w-full p-2 rounded bg-white dark:bg-gray-800"></select>
+  </div>
+  <div>
+    <label for="difficulty" class="block text-sm font-medium mb-1">Difficulty</label>
+    <select id="difficulty" class="w-full p-2 rounded bg-white dark:bg-gray-800">
+      <option value="mains">JEE Mains</option>
+      <option value="advanced">JEE Advanced</option>
+      <option value="hardcore">Hardcore Combined</option>
+    </select>
+  </div>
+  <div class="flex items-end">
+    <button id="startBtn" class="w-full p-2 bg-teal-500 text-white font-bold rounded">Start Quiz</button>
+  </div>
+</div>
+
+<!-- Question Box -->
+<div id="quizBox" class="hidden mt-4 p-4 bg-white dark:bg-gray-800 rounded shadow">
+  <div class="text-sm text-gray-500" id="questionMeta"></div>
+  <h2 class="text-lg font-semibold mt-2" id="questionText"></h2>
+  <div id="options" class="mt-4 grid gap-2"></div>
+  <button id="nextBtn" class="mt-4 p-2 bg-teal-600 text-white rounded hidden">Next</button>
+</div>
+
+  </div>  <script>
+    const syllabus = {
+      Physics: [
+        "Kinematics", "Laws of Motion", "Work, Energy and Power", "Rotational Motion", "Gravitation",
+        "Properties of Matter", "Thermodynamics", "Kinetic Theory of Gases", "Oscillations and Waves",
+        "Electrostatics", "Capacitors", "Current Electricity", "Magnetic Effects of Current", "Electromagnetic Induction",
+        "Alternating Current", "Electromagnetic Waves", "Ray Optics", "Wave Optics", "Modern Physics",
+        "Semiconductors"
+      ],
+      Chemistry: [
+        "Basic Concepts", "Atomic Structure", "Chemical Bonding", "States of Matter", "Thermodynamics",
+        "Equilibrium", "Redox Reactions", "Electrochemistry", "Chemical Kinetics", "Solutions",
+        "Solid State", "Surface Chemistry", "Hydrogen", "The s-block Element", "The p-block Element",
+        "The d- and f-block Elements", "Coordination Compounds", "Organic Chemistry Basics",
+        "Hydrocarbons", "Haloalkanes and Haloarenes", "Alcohols, Phenols and Ethers",
+        "Aldehydes, Ketones and Carboxylic Acids", "Amines", "Biomolecules", "Polymers", "Chemistry in Everyday Life"
+      ],
+      Maths: [
+        "Sets and Relations", "Functions", "Inverse Trigonometry", "Complex Numbers", "Quadratic Equations",
+        "Sequences and Series", "Permutations and Combinations", "Binomial Theorem", "Matrices",
+        "Determinants", "Limits", "Continuity and Differentiability", "Application of Derivatives",
+        "Integrals", "Differential Equations", "Vector Algebra", "3D Geometry", "Probability",
+        "Trigonometry", "Statistics"
+      ]
+    };
+
+    const subjectEl = document.getElementById("subject");
+    const topicEl = document.getElementById("topic");
+    const difficultyEl = document.getElementById("difficulty");
+    const startBtn = document.getElementById("startBtn");
+    const quizBox = document.getElementById("quizBox");
+    const questionText = document.getElementById("questionText");
+    const optionsEl = document.getElementById("options");
+    const nextBtn = document.getElementById("nextBtn");
+    const questionMeta = document.getElementById("questionMeta");
+
+    let currentQuestion = {};
+    let questionIndex = 0;
+    let userMistakes = JSON.parse(localStorage.getItem("mistakeMap") || "{}");
+
+    // Load full syllabus into subject dropdown
+    for (let sub in syllabus) {
+      const opt = document.createElement("option");
+      opt.value = sub;
+      opt.textContent = sub;
+      subjectEl.appendChild(opt);
+    }
+
+    subjectEl.addEventListener("change", () => updateTopics(subjectEl.value));
+    function updateTopics(subject) {
+      topicEl.innerHTML = syllabus[subject].map(t => `<option value="${t}">${t}</option>`).join("");
+    }
+    updateTopics(subjectEl.value);
+
+    startBtn.onclick = () => {
+      const subject = subjectEl.value;
+      const topic = topicEl.value;
+      const difficulty = difficultyEl.value;
+
+      currentQuestion = {
+        subject,
+        topic,
+        difficulty,
+        question: `What is a key concept in ${topic}?`,
+        options: ["Option A", "Option B", "Correct Answer", "Option D"],
+        answer: "Correct Answer"
+      };
+
+      displayQuestion(currentQuestion);
+    };
+
+    function displayQuestion(q) {
+      quizBox.classList.remove("hidden");
+      nextBtn.classList.add("hidden");
+      questionMeta.innerText = `${q.subject} | ${q.topic} | ${capitalize(q.difficulty)}`;
+      questionText.innerText = q.question;
+      optionsEl.innerHTML = "";
+
+      q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "w-full p-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-teal-500 hover:text-white";
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(btn, opt === q.answer, q.topic);
+        optionsEl.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(btn, isCorrect, topic) {
+      [...optionsEl.children].forEach(b => b.disabled = true);
+      if (isCorrect) {
+        btn.classList.add("bg-green-400");
+      } else {
+        btn.classList.add("bg-red-400");
+        userMistakes[topic] = userMistakes[topic] ? userMistakes[topic] + 1 : 1;
+        localStorage.setItem("mistakeMap", JSON.stringify(userMistakes));
+      }
+      nextBtn.classList.remove("hidden");
+    }
+
+    nextBtn.onclick = () => {
+      quizBox.classList.add("hidden");
+      alert("Done! More coming soon in full engine ✨");
+    };
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+  </script></body>
+</html>
